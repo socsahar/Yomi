@@ -2521,6 +2521,9 @@ function showShiftNavigation() {
     
     if (!currentSchedule || !currentSchedule.shifts || currentSchedule.shifts.length === 0) return;
     
+    // Create toggle button if it doesn't exist
+    createToggleButton();
+    
     const nav = document.createElement('div');
     nav.id = 'shiftNavigation';
     nav.style.cssText = `
@@ -2692,6 +2695,40 @@ function hideShiftNavigation() {
     if (existing) {
         existing.remove();
     }
+    const toggleBtn = document.getElementById('toggleFloatingNavBtn');
+    if (toggleBtn) {
+        toggleBtn.remove();
+    }
+}
+
+/**
+ * Create toggle button for mobile view
+ */
+function createToggleButton() {
+    // Remove existing toggle button
+    const existing = document.getElementById('toggleFloatingNavBtn');
+    if (existing) return;
+    
+    const toggleBtn = document.createElement('button');
+    toggleBtn.id = 'toggleFloatingNavBtn';
+    toggleBtn.innerHTML = '☰';
+    toggleBtn.title = 'הצג/הסתר ניווט';
+    toggleBtn.setAttribute('aria-label', 'Toggle navigation');
+    
+    toggleBtn.onclick = () => {
+        const nav = document.getElementById('shiftNavigation');
+        if (nav) {
+            nav.classList.toggle('visible');
+            // Change icon based on visibility
+            if (nav.classList.contains('visible')) {
+                toggleBtn.innerHTML = '✕';
+            } else {
+                toggleBtn.innerHTML = '☰';
+            }
+        }
+    };
+    
+    document.body.appendChild(toggleBtn);
 }
 
 /**

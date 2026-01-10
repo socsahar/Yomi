@@ -943,6 +943,21 @@ body {
     .schedules-list-container {
         padding: 10px;
     }
+
+    /* Show toggle button and hide floating nav by default on mobile */
+    #toggleFloatingNavBtn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #shiftNavigation {
+        display: none !important;
+    }
+
+    #shiftNavigation.visible {
+        display: flex !important;
+    }
 }
 
 /* Utility Classes */
@@ -1082,6 +1097,34 @@ body {
 
 .shift-nav-btn:active {
     transform: scale(0.95) !important;
+}
+
+/* Toggle button for floating navigation (mobile only) */
+#toggleFloatingNavBtn {
+    display: none;
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--primary-red);
+    color: white;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 9999;
+    transition: all 0.3s ease;
+}
+
+#toggleFloatingNavBtn:hover {
+    background: var(--dark-red);
+    transform: scale(1.1);
+}
+
+#toggleFloatingNavBtn:active {
+    transform: scale(0.95);
 }
 
 /* Shift section highlight */

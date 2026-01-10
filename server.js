@@ -1,5 +1,6 @@
 const express = require('express');
 const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
 const bodyParser = require('body-parser');
 const path = require('path');
 require('dotenv').config();
@@ -17,8 +18,15 @@ const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Session configuration
+// Session configuration with PostgreSQL store
 app.use(session({
+    store: new pgSession({
+        conString: process.env.SUPABASE_URL ? 
+            `postgresql://postgres.rbjmlwlgznxrdctpgxze:${process.env.SUPABASE_SERVICE_KEY}@aws-0-eu-central-1.pooler.supabase.com:6543/postgres` :
+            undefined,
+        createTableIfMissing: true,
+        tableName: 'session'
+    }),
     secret: process.env.SESSION_SECRET || 'mda-shift-scheduler-secret-key-change-in-production',
     resave: false,
     saveUninitialized: false,
