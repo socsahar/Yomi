@@ -944,19 +944,27 @@ body {
         padding: 10px;
     }
 
-    /* Show toggle button and hide floating nav by default on mobile */
+    /* Show toggle button and control floating nav visibility on mobile */
     #toggleFloatingNavBtn {
-        display: flex;
+        display: flex !important;
         align-items: center;
         justify-content: center;
     }
 
+    /* Hide floating navigation by default on mobile, show when .visible class is added */
     #shiftNavigation {
         display: none !important;
     }
 
     #shiftNavigation.visible {
         display: flex !important;
+        position: fixed !important;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        flex-direction: column;
+        gap: 10px;
+        z-index: 9998;
     }
 }
 

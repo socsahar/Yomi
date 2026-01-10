@@ -2466,7 +2466,7 @@ function showRealtimeIndicator(active) {
             font-size: 14px;
             font-weight: 600;
             z-index: 9999;
-            display: flex;
+            display: none;
             align-items: center;
             gap: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
@@ -2709,6 +2709,8 @@ function createToggleButton() {
     const existing = document.getElementById('toggleFloatingNavBtn');
     if (existing) return;
     
+    console.log('Creating toggle button for mobile navigation');
+    
     const toggleBtn = document.createElement('button');
     toggleBtn.id = 'toggleFloatingNavBtn';
     toggleBtn.innerHTML = '☰';
@@ -2717,18 +2719,22 @@ function createToggleButton() {
     
     toggleBtn.onclick = () => {
         const nav = document.getElementById('shiftNavigation');
+        console.log('Toggle button clicked, nav element:', nav);
         if (nav) {
             nav.classList.toggle('visible');
             // Change icon based on visibility
             if (nav.classList.contains('visible')) {
                 toggleBtn.innerHTML = '✕';
+                console.log('Navigation shown');
             } else {
                 toggleBtn.innerHTML = '☰';
+                console.log('Navigation hidden');
             }
         }
     };
     
     document.body.appendChild(toggleBtn);
+    console.log('Toggle button appended to body');
 }
 
 /**
