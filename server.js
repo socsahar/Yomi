@@ -22,9 +22,12 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'mda-shift-scheduler-secret-key-change-in-production',
     resave: false,
     saveUninitialized: false,
+    proxy: true, // Trust proxy for Render
     cookie: {
         secure: process.env.NODE_ENV === 'production',
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // Allow cross-site for production
     }
 }));
 
