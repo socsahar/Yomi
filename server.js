@@ -18,15 +18,9 @@ const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Session configuration with PostgreSQL store
-app.use(session({
-    store: new pgSession({
-        conString: process.env.SUPABASE_URL ? 
-            `postgresql://postgres.rbjmlwlgznxrdctpgxze:${process.env.SUPABASE_SERVICE_KEY}@aws-0-eu-central-1.pooler.supabase.com:6543/postgres` :
-            undefined,
-        createTableIfMissing: true,
-        tableName: 'session'
-    }),
+// Session configuration with PostgreSQL store (optional)
+// If DATABASE_URL is provided, use PostgreSQL session store, otherwise use MemoryStore
+const sessionConfig = {
     secret: process.env.SESSION_SECRET || 'mda-shift-scheduler-secret-key-change-in-production',
     resave: false,
     saveUninitialized: false,
@@ -35,9 +29,24 @@ app.use(session({
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000, // 24 hours
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // Allow cross-site for production
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
     }
-}));
+};
+
+// Add PostgreSQL session store if DATABASE_URL is available
+if (process.env.DATABASE_URL) {
+    console.log('Using PostgreSQL session store');
+    sessionConfig.store = new pgSession({
+        conString: process.env.DATABASE_URL,
+        createTableIfMissing: true,
+        tableName: 'session'
+    });
+} else {
+    console.log('Warning: Using MemoryStore for sessions (not recommended for production)');
+    console.log('Add DATABASE_URL environment variable to use PostgreSQL session store');
+}
+
+app.use(session(sessionConfig));
 
 // Routes
 app.use('/api/auth', authRoutes);
