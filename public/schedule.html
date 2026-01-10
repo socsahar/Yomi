@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>סידור עבודה - מד"א</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>מערכת סידורי עבודה</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/dashboard" class="nav-link">ראשי</a></li>
+                <li><a href="/employees" class="nav-link">עובדים</a></li>
+                <li><a href="/schedule" class="nav-link active">סידורי עבודה</a></li>
+                <li><a href="/reports" class="nav-link">דוחות</a></li>
+                <li><a href="#" id="logoutBtn" class="nav-link">התנתק</a></li>
+            </ul>
+            <div class="user-info">
+                <span id="username-display"></span>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="page-header">
+            <h2>סידורי עבודה</h2>
+            <div class="header-actions">
+                <button id="newScheduleBtn" class="btn btn-primary">סידור חדש</button>
+                <button id="exportHtmlBtn" class="btn btn-secondary" disabled>שמור כPDF</button>
+            </div>
+        </div>
+        
+        <!-- Schedule Selection -->
+        <div id="scheduleSelection" class="schedule-selection">
+            <div class="schedules-list-container">
+                <h3>סידורים קיימים</h3>
+                <div id="schedulesList" class="schedules-list">
+                    <p class="loading">טוען סידורים...</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Schedule Editor -->
+        <div id="scheduleEditor" class="schedule-editor" style="display: none;">
+            <div class="schedule-info">
+                <div class="info-item">
+                    <label>תאריך:</label>
+                    <span id="scheduleDate" class="editable" title="לחץ לעריכה"></span>
+                </div>
+                <div class="info-item">
+                    <label>סטטוס:</label>
+                    <span id="scheduleStatus" class="status-badge editable" title="לחץ לעריכה"></span>
+                </div>
+            </div>
+            
+            <div class="editor-actions">
+                <button id="toggleEmployeesBtn" class="btn btn-secondary">עובדים זמינים</button>
+                <button id="saveScheduleBtn" class="btn btn-primary">שמור שינויים</button>
+                <button id="deleteScheduleBtn" class="btn btn-danger">מחק סידור</button>
+                <button id="closeEditorBtn" class="btn btn-secondary">סגור</button>
+            </div>
+            
+            <div id="shiftsContainer" class="shifts-container">
+                <!-- Shifts will be dynamically added here -->
+            </div>
+            
+            <div class="notes-section" style="margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 5px;">
+                <h3 style="margin-bottom: 10px;">הערות</h3>
+                <div id="notesList" style="margin-bottom: 10px;">
+                    <!-- Notes will be rendered here -->
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="text" id="newNoteInput" 
+                        placeholder="הוסף הערה חדשה..."
+                        style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit;">
+                    <button id="addNoteBtn" class="btn btn-primary">הוסף</button>
+                </div>
+            </div>
+            
+            <div class="extra-missions-section" style="margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 5px; border: 2px solid #2196F3;">
+                <h3 style="margin-bottom: 10px;">משימות מחוץ למשמרת</h3>
+                <div id="extraMissionsList" style="margin-bottom: 10px;">
+                    <!-- Extra missions will be rendered here -->
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 10px;">
+                    <input type="text" id="missionHours" 
+                        placeholder="שעות..."
+                        style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    <input type="text" id="missionLocation" 
+                        placeholder="מיקום..."
+                        style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    <input type="text" id="missionVehicle" 
+                        placeholder="רכב..."
+                        style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    <input type="text" id="missionDriverName" 
+                        placeholder="שם נהג..."
+                        style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <input type="text" id="missionNotes" 
+                    placeholder="הערות..."
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 10px;">
+                <button id="addExtraMissionBtn" class="btn btn-primary">הוסף משימה</button>
+            </div>
+            
+            <div class="extra-ambulances-section" style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 5px; border: 2px solid #ffc107;">
+                <h3 style="margin-bottom: 10px;">מעל התקן</h3>
+                <div id="extraAmbulancesList" style="margin-bottom: 10px;">
+                    <!-- Extra ambulances will be rendered here -->
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 10px;">
+                    <input type="text" id="extraWorkingHours" 
+                        placeholder="שעות עבודה..."
+                        style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    <input type="text" id="extraStation" 
+                        placeholder="תחנה..."
+                        style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    <input type="text" id="extraAmbulanceNumber" 
+                        placeholder="מספר אמבולנס..."
+                        style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    <input type="text" id="extraDriverName" 
+                        placeholder="שם נהג..."
+                        style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <input type="text" id="extraNotes" 
+                    placeholder="הערות..."
+                    style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 10px;">
+                <button id="addExtraAmbulanceBtn" class="btn btn-primary">הוסף מעל התקן</button>
+            </div>
+        </div>
+        
+        <!-- Employees Sidebar -->
+        <div id="employeesSidebar" class="employees-sidebar">
+            <div class="sidebar-header">
+                <h3>עובדים זמינים</h3>
+                <div class="station-filters" style="margin-bottom: 10px;">
+                    <button class="station-filter-btn active" data-station="ירקון דרום">ירקון דרום</button>
+                    <button class="station-filter-btn active" data-station="ירקון צפון">ירקון צפון</button>
+                </div>
+                <input type="text" id="employeeSearch" placeholder="חיפוש עובד...">
+                <button class="close-sidebar">&times;</button>
+            </div>
+            <div id="employeesList" class="employees-list">
+                <!-- Employees will be loaded here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- New Schedule Modal -->
+    <div id="newScheduleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>יצירת סידור עבודה חדש</h3>
+                <span class="close">&times;</span>
+            </div>
+            <form id="newScheduleForm">
+                <div class="form-group">
+                    <label for="scheduleDate">תאריך *</label>
+                    <input type="date" id="scheduleDateInput" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">צור סידור</button>
+                    <button type="button" class="btn btn-secondary" id="cancelNewScheduleBtn">ביטול</button>
+                </div>
+                <div id="newScheduleError" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Custom Prompt Modal -->
+    <div id="customPromptModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="promptTitle"></h3>
+            </div>
+            <div class="modal-body">
+                <p id="promptMessage"></p>
+                <input type="text" id="promptInput" class="form-input">
+                <select id="promptSelect" class="form-input" style="display: none;"></select>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-primary" id="promptConfirm">אישור</button>
+                <button type="button" class="btn btn-secondary" id="promptCancel">ביטול</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Custom Alert Modal -->
+    <div id="customAlertModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="alertTitle">הודעה</h3>
+            </div>
+            <div class="modal-body">
+                <p id="alertMessage"></p>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-primary" id="alertOk">אישור</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Custom Confirm Modal -->
+    <div id="customConfirmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="confirmTitle">אישור</h3>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage"></p>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-primary" id="confirmYes">כן</button>
+                <button type="button" class="btn btn-secondary" id="confirmNo">לא</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/schedule.js"></script>
+</body>
+</html>

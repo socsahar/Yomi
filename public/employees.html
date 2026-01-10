@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ניהול עובדים - מד"א</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>מערכת סידורי עבודה</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/dashboard" class="nav-link">ראשי</a></li>
+                <li><a href="/employees" class="nav-link active">עובדים</a></li>
+                <li><a href="/schedule" class="nav-link">סידורי עבודה</a></li>
+                <li><a href="/reports" class="nav-link">דוחות</a></li>
+                <li><a href="#" id="logoutBtn" class="nav-link">התנתק</a></li>
+            </ul>
+            <div class="user-info">
+                <span id="username-display"></span>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="page-header">
+            <h2>ניהול עובדים</h2>
+            <div class="header-actions">
+                <button id="addEmployeeBtn" class="btn btn-primary">הוסף עובד</button>
+                <button id="importEmployeesBtn" class="btn btn-secondary">ייבוא מאקסל</button>
+            </div>
+        </div>
+        
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="חיפוש עובד...">
+        </div>
+        
+        <div class="employees-table-container">
+            <table class="employees-table">
+                <thead>
+                    <tr>
+                        <th>שם פרטי</th>
+                        <th>שם משפחה</th>
+                        <th>מספר עובד</th>
+                        <th>תפקיד</th>
+                        <th>תחנה</th>
+                        <th>טלפון</th>
+                        <th>פעולות</th>
+                    </tr>
+                </thead>
+                <tbody id="employeesTableBody">
+                    <tr>
+                        <td colspan="7" class="loading">טוען עובדים...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Employee Form Modal -->
+    <div id="employeeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">הוסף עובד</h3>
+                <span class="close">&times;</span>
+            </div>
+            <form id="employeeForm">
+                <input type="hidden" id="employeeId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">שם פרטי *</label>
+                        <input type="text" id="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">שם משפחה *</label>
+                        <input type="text" id="lastName" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="employeeIdField">מספר עובד</label>
+                        <input type="text" id="employeeIdField">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">טלפון</label>
+                        <input type="tel" id="phone">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">דוא"ל</label>
+                        <input type="email" id="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="position">תפקיד</label>
+                        <input type="text" id="position">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="station">תחנה</label>
+                    <input type="text" id="station">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">שמור</button>
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">ביטול</button>
+                </div>
+                <div id="formError" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Import Modal -->
+    <div id="importModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>ייבוא עובדים מאקסל</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="import-instructions">
+                <p>העלה קובץ Excel עם העמודות הבאות:</p>
+                <ul>
+                    <li>שם פרטי (חובה)</li>
+                    <li>שם משפחה (חובה)</li>
+                    <li>מספר עובד</li>
+                    <li>טלפון</li>
+                    <li>דוא"ל</li>
+                    <li>תפקיד</li>
+                    <li>תחנה</li>
+                </ul>
+                <input type="file" id="excelFile" accept=".xlsx,.xls">
+                <button id="processFileBtn" class="btn btn-primary">עבד קובץ</button>
+            </div>
+            <div id="importResult" class="import-result"></div>
+        </div>
+    </div>
+    
+    <script src="/js/common.js"></script>
+    <script src="/js/employees.js"></script>
+</body>
+</html>

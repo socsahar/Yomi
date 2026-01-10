@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מערכת סידורי עבודה מד"א</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>מערכת סידורי עבודה</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/dashboard" class="nav-link active">ראשי</a></li>
+                <li><a href="/employees" class="nav-link">עובדים</a></li>
+                <li><a href="/schedule" class="nav-link">סידורי עבודה</a></li>
+                <li><a href="/reports" class="nav-link">דוחות</a></li>
+                <li><a href="#" id="logoutBtn" class="nav-link">התנתק</a></li>
+            </ul>
+            <div class="user-info">
+                <span id="username-display"></span>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="page-header">
+            <h2>דף הבית</h2>
+        </div>
+        
+        <div class="dashboard-grid">
+            <div class="dashboard-card">
+                <div class="card-icon employees-icon">👥</div>
+                <h3>ניהול עובדים</h3>
+                <p>צפייה ועריכת רשימת העובדים</p>
+                <a href="/employees" class="btn btn-primary">עבור לעובדים</a>
+            </div>
+            
+            <div class="dashboard-card">
+                <div class="card-icon schedule-icon">📅</div>
+                <h3>סידורי עבודה</h3>
+                <p>יצירה ועריכת סידורי עבודה יומיים</p>
+                <a href="/schedule" class="btn btn-primary">עבור לסידורים</a>
+            </div>
+            
+            <div class="dashboard-card">
+                <div class="card-icon stats-icon">📊</div>
+                <h3>דוחות</h3>
+                <p>צפייה בדוחות וניתוחים</p>
+                <a href="/reports" class="btn btn-primary">עבור לדוחות</a>
+            </div>
+        </div>
+        
+        <div class="recent-schedules">
+            <h3>סידורי עבודה אחרונים</h3>
+            <div id="recent-schedules-list" class="schedules-list">
+                <p class="loading">טוען...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/common.js"></script>
+    <script src="/js/dashboard.js"></script>
+</body>
+</html>

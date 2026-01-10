@@ -1,0 +1,85 @@
+# Dependencies
+node_modules/
+bower_components/
+
+# Environment variables and secrets
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+*.env
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Build and distribution
+dist/
+build/
+*.min.js
+*.min.css
+
+# Database files (local SQLite, etc.)
+*.sqlite
+*.sqlite3
+*.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.cache
+
+# Excel and CSV files with sensitive data
+employee*.xlsx
+employee*.csv
+
+# Documentation files (optional, keep if you want to track them)
+MANUAL_ASSIGNMENT_FEATURE.md
+
+# Backup and old files
+*.backup
+*.old
+*_backup.*
+*_old.*
+
+# Session files
+sessions/
+*.session
+
+# Keys and certificates
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+
+# Configuration files that might contain secrets
+config.local.js
+config.production.js
