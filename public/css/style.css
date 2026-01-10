@@ -787,19 +787,35 @@ body {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
     .nav-menu {
-        gap: 15px;
+        gap: 10px;
+        flex-wrap: wrap;
     }
     
     .nav-link {
-        padding: 6px 10px;
-        font-size: 0.9rem;
+        padding: 6px 8px;
+        font-size: 0.85rem;
     }
     
     .page-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 15px;
+    }
+    
+    .header-actions {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .header-actions .btn {
+        width: 100%;
     }
     
     .dashboard-grid {
@@ -814,6 +830,28 @@ body {
         grid-template-columns: 1fr;
     }
     
+    .shift-section {
+        padding: 15px;
+    }
+    
+    .role-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .role-actions {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .role-actions button {
+        flex: 1;
+        min-width: 100px;
+    }
+    
     .employees-sidebar {
         width: 100%;
         left: -100%;
@@ -821,6 +859,89 @@ body {
     
     .employees-sidebar.open {
         left: 0;
+    }
+    
+    .schedule-info {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .editor-actions {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .editor-actions .btn {
+        flex: 1 1 calc(50% - 5px);
+        min-width: 120px;
+    }
+    
+    .notes-section,
+    .extra-missions-section {
+        padding: 10px !important;
+    }
+    
+    .notes-section > div,
+    .extra-missions-section > div {
+        flex-direction: column !important;
+    }
+    
+    .notes-section input,
+    .extra-missions-section input {
+        width: 100% !important;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 20px auto;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .station-filters {
+        width: 100%;
+        justify-content: stretch;
+    }
+    
+    .station-filter-btn {
+        flex: 1;
+    }
+    
+    /* Fix overlapping navigation */
+    .nav-container {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+    }
+    
+    .nav-brand h1 {
+        font-size: 1.2rem;
+    }
+    
+    .user-info {
+        width: 100%;
+        text-align: center;
+    }
+    
+    /* Table responsiveness */
+    .data-table {
+        font-size: 0.85rem;
+    }
+    
+    .data-table th,
+    .data-table td {
+        padding: 8px 4px;
+    }
+    
+    /* Schedule list items */
+    .schedule-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .schedules-list-container {
+        padding: 10px;
     }
 }
 

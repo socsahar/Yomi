@@ -367,30 +367,46 @@ router.post('/assignments', requireAuth, async (req, res) => {
         
         if (existing && existing.length > 0) {
             // Update existing assignment
-            const updateData = {};
-            if (employee_id) {
-                updateData.employee_id = employee_id;
-                updateData.manual_employee_name = null;
-            } else {
-                updateData.employee_id = null;
-                updateData.manual_employee_name = manual_employee_name;
-            }
+            const updateData = {
+                employee_id: employee_id || null,
+                manual_employee_name: manual_employee_name || null
+            };
             
             const updated = await update('assignments', existing[0].id, updateData);
             return res.json(updated[0]);
         }
         
-        // Create new assignment
-        const assignmentData = {
-            role_id,
-            schedule_id,
-            employee_id: employee_id || null,
-            manual_employee_name: manual_employee_name || null
-        };
+        // Create new assignment with upsert to handle race conditions
+        try {
+            const assignmentData = {
+                role_id,
+                schedule_id,
+                employee_id: employee_id || null,
+                manual_employee_name: manual_employee_name || null
+            };
+            
+            const newAssignment = await insert('assignments', assignmentData);
+            res.json(newAssignment[0]);
+        } catch (insertError) {
+            // If insert fails due to duplicate, try to update
+            if (insertError.code === '23505') {
+                console.log('Duplicate detected, updating instead...');
+                const existing = await select('assignments', {
+                    where: { role_id, schedule_id }
+                });
+                
+                if (existing && existing.length > 0) {
+                    const updateData = {
+                        employee_id: employee_id || null,
+                        manual_employee_name: manual_employee_name || null
+                    };
+                    const updated = await update('assignments', existing[0].id, updateData);
+                    return res.json(updated[0]);
+                }
+            }
+            throw insertError;
+        }
         
-        const newAssignment = await insert('assignments', assignmentData);
-        
-        res.json(newAssignment[0]);
     } catch (error) {
         console.error('Error assigning employee:', error);
         res.status(500).json({ error: 'שגיאה בשיבוץ עובד' });
