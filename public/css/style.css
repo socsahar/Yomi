@@ -85,6 +85,42 @@ body {
     font-weight: 500;
 }
 
+/* Hamburger Menu */
+.hamburger-menu {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px;
+    height: 24px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 10;
+    position: relative;
+}
+
+.hamburger-menu span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background-color: white;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.hamburger-menu.active span:nth-child(1) {
+    transform: rotate(45deg) translate(8px, 8px);
+}
+
+.hamburger-menu.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger-menu.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(8px, -8px);
+}
+
 /* Page Header */
 .page-header {
     display: flex;
@@ -790,15 +826,61 @@ body {
     .container {
         padding: 10px;
     }
-    
-    .nav-menu {
-        gap: 10px;
-        flex-wrap: wrap;
+
+    /* Hamburger menu visible on mobile */
+    .hamburger-menu {
+        display: flex;
     }
-    
+
+    /* Hide navigation by default on mobile */
+    .nav-menu {
+        position: fixed;
+        top: 60px;
+        right: -100%;
+        width: 250px;
+        height: calc(100vh - 60px);
+        background: var(--primary-red);
+        flex-direction: column;
+        padding: 20px 0;
+        gap: 0;
+        transition: right 0.3s ease;
+        box-shadow: -2px 0 10px rgba(0,0,0,0.2);
+        z-index: 999;
+    }
+
+    .nav-menu.active {
+        right: 0;
+    }
+
+    .nav-menu li {
+        width: 100%;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
     .nav-link {
-        padding: 6px 8px;
-        font-size: 0.85rem;
+        display: block;
+        width: 100%;
+        padding: 15px 20px;
+        font-size: 1rem;
+        border-radius: 0;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+        background-color: var(--dark-red);
+    }
+
+    /* Adjust nav-container for hamburger */
+    .nav-container {
+        position: relative;
+    }
+
+    .nav-brand h1 {
+        font-size: 1.2rem;
+    }
+
+    .user-info {
+        font-size: 0.9rem;
     }
     
     .page-header {
