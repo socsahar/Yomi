@@ -857,6 +857,15 @@ async function handleNewSchedule(e) {
             })
         });
         
+        // Show immediate notification
+        if (typeof showImmediateNotification === 'function') {
+            showImmediateNotification(
+                'create',
+                'schedule',
+                `יצר סידור עבודה חדש לתאריך ${date}`
+            );
+        }
+        
         hideModal('newScheduleModal');
         await loadSchedules();
         await loadScheduleEditor(newSchedule.id);

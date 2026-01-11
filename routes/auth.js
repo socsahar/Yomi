@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
-const { select, insert } = require('../config/database');
+const { select, insert, update, supabase } = require('../config/database');
+const { logActivity } = require('./activity');
 
 const router = express.Router();
 const SALT_ROUNDS = 10;
@@ -96,6 +97,23 @@ router.post('/login', async (req, res) => {
         req.session.userId = user.id;
         req.session.username = user.username;
         
+        // Update last activity
+        await update('users', user.id, {
+            last_activity: new Date().toISOString()
+        });
+        
+        // Log activity
+        await logActivity(
+            user.id,
+            user.username,
+            'login',
+            'user',
+            user.id,
+            'התחבר למערכת',
+            null,
+            req.ip
+        );
+        
         res.json({
             success: true,
             message: 'התחברת בהצלחה',
@@ -126,8 +144,17 @@ router.post('/logout', (req, res) => {
 /**
  * Check authentication status
  */
-router.get('/status', (req, res) => {
+router.get('/status', async (req, res) => {
     if (req.session.userId) {
+        // Update last activity
+        try {
+            await update('users', req.session.userId, {
+                last_activity: new Date().toISOString()
+            });
+        } catch (error) {
+            console.error('Error updating last activity:', error);
+        }
+        
         res.json({
             authenticated: true,
             user: {
@@ -137,6 +164,55 @@ router.get('/status', (req, res) => {
         });
     } else {
         res.json({ authenticated: false });
+    }
+});
+
+/**
+ * Get online users (users active in last 1 hour)
+ */
+router.get('/online-users', async (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ error: 'נדרשת הזדהות' });
+    }
+    
+    try {
+        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+        
+        const { data: users, error } = await supabase
+            .from('users')
+            .select('id, username, last_activity')
+            .gt('last_activity', oneHourAgo)
+            .order('username', { ascending: true });
+        
+        if (error) throw error;
+        
+        res.json({
+            users: users || [],
+            count: users ? users.length : 0
+        });
+    } catch (error) {
+        console.error('Error fetching online users:', error);
+        res.status(500).json({ error: 'שגיאה בטעינת משתמשים מחוברים' });
+    }
+});
+
+/**
+ * Update user activity (heartbeat)
+ */
+router.post('/heartbeat', async (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ error: 'נדרשת הזדהות' });
+    }
+    
+    try {
+        await update('users', req.session.userId, {
+            last_activity: new Date().toISOString()
+        });
+        
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error updating heartbeat:', error);
+        res.status(500).json({ error: 'שגיאה בעדכון פעילות' });
     }
 });
 

@@ -2,6 +2,11 @@
 require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 
+// Fix SSL certificate issue in development
+if (process.env.NODE_ENV !== 'production') {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
+
 // Initialize Supabase client
 const supabase = createClient(
     process.env.SUPABASE_URL,

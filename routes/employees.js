@@ -1,5 +1,6 @@
 const express = require('express');
 const { select, insert, update, deleteRow, supabase } = require('../config/database');
+const { logActivity } = require('./activity');
 
 const router = express.Router();
 
@@ -69,6 +70,19 @@ router.post('/', requireAuth, async (req, res) => {
             station: station || null
         });
         
+        // Log activity
+        const username = req.session.username || 'Unknown';
+        await logActivity(
+            req.session.userId,
+            username,
+            'create',
+            'employee',
+            newEmployee[0].id,
+            `הוסיף עובד חדש: ${first_name} ${last_name}`,
+            { position, station },
+            req.ip
+        );
+        
         res.json(newEmployee[0]);
     } catch (error) {
         console.error('Error creating employee:', error);
@@ -93,6 +107,19 @@ router.put('/:id', requireAuth, async (req, res) => {
             station: station || null,
             updated_at: new Date().toISOString()
         });
+        
+        // Log activity
+        const username = req.session.username || 'Unknown';
+        await logActivity(
+            req.session.userId,
+            username,
+            'update',
+            'employee',
+            req.params.id,
+            `עדכן פרטי עובד: ${first_name} ${last_name}`,
+            { position, station },
+            req.ip
+        );
         
         res.json(updatedEmployee[0]);
     } catch (error) {

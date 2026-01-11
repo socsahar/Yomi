@@ -1,5 +1,6 @@
 const express = require('express');
 const { select, insert, update, deleteRow, supabase } = require('../config/database');
+const { logActivity } = require('./activity');
 
 const router = express.Router();
 
@@ -233,6 +234,19 @@ router.post('/', requireAuth, async (req, res) => {
             }
         }
         
+        // Log activity
+        const username = req.session.username || 'Unknown';
+        await logActivity(
+            req.session.userId,
+            username,
+            'create',
+            'schedule',
+            scheduleId,
+            `יצר סידור עבודה חדש לתאריך ${schedule_date} בתחנה ${stationValue}`,
+            { station: stationValue, date: schedule_date },
+            req.ip
+        );
+        
         res.json(newSchedule[0]);
     } catch (error) {
         console.error('Error creating schedule:', error);
@@ -260,6 +274,23 @@ router.put('/:id', requireAuth, async (req, res) => {
             notes,
             updated_at: new Date().toISOString()
         });
+        
+        // Log activity
+        const username = req.session.username || 'Unknown';
+        const actionDescription = status === 'published' 
+            ? `פרסם סידור עבודה לתאריך ${schedule_date}`
+            : `עדכן סידור עבודה לתאריך ${schedule_date}`;
+        
+        await logActivity(
+            req.session.userId,
+            username,
+            status === 'published' ? 'publish' : 'update',
+            'schedule',
+            req.params.id,
+            actionDescription,
+            { station, status, date: schedule_date },
+            req.ip
+        );
         
         res.json(updatedSchedule[0]);
     } catch (error) {

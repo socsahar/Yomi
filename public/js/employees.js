@@ -168,12 +168,30 @@ async function handleEmployeeFormSubmit(e) {
                 method: 'PUT',
                 body: JSON.stringify(formData)
             });
+            
+            // Show immediate notification
+            if (typeof showImmediateNotification === 'function') {
+                showImmediateNotification(
+                    'update',
+                    'employee',
+                    `עדכן פרטי עובד: ${formData.first_name} ${formData.last_name}`
+                );
+            }
         } else {
             // Create new employee
             await apiRequest('/api/employees', {
                 method: 'POST',
                 body: JSON.stringify(formData)
             });
+            
+            // Show immediate notification
+            if (typeof showImmediateNotification === 'function') {
+                showImmediateNotification(
+                    'create',
+                    'employee',
+                    `הוסיף עובד חדש: ${formData.first_name} ${formData.last_name}`
+                );
+            }
         }
         
         hideModal('employeeModal');

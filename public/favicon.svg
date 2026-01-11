@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <style>
+      .star { fill: #E74C3C; stroke: #C0392B; stroke-width: 2; }
+    </style>
+  </defs>
+  <!-- Magen David (Star of David) - Two overlapping triangles -->
+  <!-- Top triangle pointing up -->
+  <polygon class="star" points="50,20 65,45 35,45"/>
+  <!-- Bottom triangle pointing down -->
+  <polygon class="star" points="50,80 35,55 65,55"/>
+  <!-- Left triangles -->
+  <polygon class="star" points="25,42 35,45 25,58"/>
+  <!-- Right triangles -->
+  <polygon class="star" points="75,42 65,45 75,58"/>
+  <!-- Center hexagon -->
+  <polygon class="star" points="50,40 60,50 50,60 40,50"/>
+</svg>
