@@ -49,6 +49,10 @@ router.get('/excel/:scheduleId', requireAuth, async (req, res) => {
     try {
         const scheduleId = req.params.scheduleId;
         
+        console.log('===============================================');
+        console.log('EXCEL EXPORT STARTED FOR SCHEDULE:', scheduleId);
+        console.log('===============================================');
+        
         // Get full schedule data with all nested data in ONE query
         const { data: schedule, error: scheduleError } = await supabase
             .from('schedules')
@@ -107,6 +111,9 @@ router.get('/excel/:scheduleId', requireAuth, async (req, res) => {
             }
             assignmentsByRole[assignment.role_id].push(assignment);
         });
+        
+        console.log('Total assignments fetched:', assignments?.length || 0);
+        console.log('Assignments by role:', Object.keys(assignmentsByRole).length, 'roles have assignments');
         
         // Create workbook from scratch
         const workbook = new ExcelJS.Workbook();
@@ -244,8 +251,13 @@ router.get('/excel/:scheduleId', requireAuth, async (req, res) => {
                         
                         const assignment = roleData.assignments[0];
                         const employeeName = getEmployeeName(assignment);
+                        
+                        console.log(`Row ${currentRow} - Role: ${roleName}, Assignments:`, roleData.assignments.length, 'Employee:', employeeName || 'NONE');
+                        
+                        // Get the name cell and set value
+                        const nameCell = worksheet.getCell(currentRow, 4);
                         if (employeeName) {
-                            worksheet.getCell(currentRow, 4).value = employeeName;
+                            nameCell.value = employeeName;
                         }
                         
                         // Add ambulance number only on first regular role
@@ -253,19 +265,44 @@ router.get('/excel/:scheduleId', requireAuth, async (req, res) => {
                             worksheet.getCell(currentRow, 5).value = roleData.role.ambulance_number;
                             ambulanceAdded['לילה'] = true;
                         }
-                    }
-                    
-                    // Style cells
-                    for (let col = 3; col <= 5; col++) {
-                        const cell = worksheet.getCell(currentRow, col);
-                        cell.border = {
+                        
+                        // Style cells
+                        worksheet.getCell(currentRow, 3).border = {
                             top: { style: 'thin' },
                             left: { style: 'thin' },
                             bottom: { style: 'thin' },
                             right: { style: 'thin' }
                         };
-                        cell.font = { name: 'Arial', size: 10 };
-                        cell.alignment = cell.alignment || { horizontal: 'center', vertical: 'middle' };
+                        worksheet.getCell(currentRow, 3).font = { name: 'Arial', size: 10 };
+                        worksheet.getCell(currentRow, 3).alignment = { horizontal: 'center', vertical: 'middle' };
+                        
+                        nameCell.border = {
+                            top: { style: 'thin' },
+                            left: { style: 'thin' },
+                            bottom: { style: 'thin' },
+                            right: { style: 'thin' }
+                        };
+                        nameCell.font = { name: 'Arial', size: 10 };
+                        nameCell.alignment = { horizontal: 'center', vertical: 'middle' };
+                        
+                        // Set red fill if no employee
+                        if (!employeeName || employeeName.trim() === '') {
+                            console.log(`No employee for role ${roleName} at row ${currentRow}, col 4 - applying red fill`);
+                            nameCell.fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: 'FFFF0000' }
+                            };
+                        }
+                        
+                        worksheet.getCell(currentRow, 5).border = {
+                            top: { style: 'thin' },
+                            left: { style: 'thin' },
+                            bottom: { style: 'thin' },
+                            right: { style: 'thin' }
+                        };
+                        worksheet.getCell(currentRow, 5).font = { name: 'Arial', size: 10 };
+                        worksheet.getCell(currentRow, 5).alignment = { horizontal: 'center', vertical: 'middle' };
                     }
                 }
                 
@@ -286,26 +323,55 @@ router.get('/excel/:scheduleId', requireAuth, async (req, res) => {
                         
                         const assignment = roleData.assignments[0];
                         const employeeName = getEmployeeName(assignment);
+                        
+                        // Get the name cell and set value
+                        const nameCell = worksheet.getCell(currentRow, 7);
                         if (employeeName) {
-                            worksheet.getCell(currentRow, 7).value = employeeName;
+                            nameCell.value = employeeName;
                         }
                         
                         if (!ambulanceAdded['בוקר'] && roleData.role.ambulance_number) {
                             worksheet.getCell(currentRow, 8).value = roleData.role.ambulance_number;
                             ambulanceAdded['בוקר'] = true;
                         }
-                    }
-                    
-                    for (let col = 6; col <= 8; col++) {
-                        const cell = worksheet.getCell(currentRow, col);
-                        cell.border = {
+                        
+                        // Style cells
+                        worksheet.getCell(currentRow, 6).border = {
                             top: { style: 'thin' },
                             left: { style: 'thin' },
                             bottom: { style: 'thin' },
                             right: { style: 'thin' }
                         };
-                        cell.font = { name: 'Arial', size: 10 };
-                        cell.alignment = cell.alignment || { horizontal: 'center', vertical: 'middle' };
+                        worksheet.getCell(currentRow, 6).font = { name: 'Arial', size: 10 };
+                        worksheet.getCell(currentRow, 6).alignment = { horizontal: 'center', vertical: 'middle' };
+                        
+                        nameCell.border = {
+                            top: { style: 'thin' },
+                            left: { style: 'thin' },
+                            bottom: { style: 'thin' },
+                            right: { style: 'thin' }
+                        };
+                        nameCell.font = { name: 'Arial', size: 10 };
+                        nameCell.alignment = { horizontal: 'center', vertical: 'middle' };
+                        
+                        // Set red fill if no employee
+                        if (!employeeName || employeeName.trim() === '') {
+                            console.log(`No employee for role ${roleName} at row ${currentRow}, col 7 - applying red fill`);
+                            nameCell.fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: 'FFFF0000' }
+                            };
+                        }
+                        
+                        worksheet.getCell(currentRow, 8).border = {
+                            top: { style: 'thin' },
+                            left: { style: 'thin' },
+                            bottom: { style: 'thin' },
+                            right: { style: 'thin' }
+                        };
+                        worksheet.getCell(currentRow, 8).font = { name: 'Arial', size: 10 };
+                        worksheet.getCell(currentRow, 8).alignment = { horizontal: 'center', vertical: 'middle' };
                     }
                 }
                 
@@ -326,26 +392,55 @@ router.get('/excel/:scheduleId', requireAuth, async (req, res) => {
                         
                         const assignment = roleData.assignments[0];
                         const employeeName = getEmployeeName(assignment);
+                        
+                        // Get the name cell and set value
+                        const nameCell = worksheet.getCell(currentRow, 10);
                         if (employeeName) {
-                            worksheet.getCell(currentRow, 10).value = employeeName;
+                            nameCell.value = employeeName;
                         }
                         
                         if (!ambulanceAdded['ערב'] && roleData.role.ambulance_number) {
                             worksheet.getCell(currentRow, 11).value = roleData.role.ambulance_number;
                             ambulanceAdded['ערב'] = true;
                         }
-                    }
-                    
-                    for (let col = 9; col <= 11; col++) {
-                        const cell = worksheet.getCell(currentRow, col);
-                        cell.border = {
+                        
+                        // Style cells
+                        worksheet.getCell(currentRow, 9).border = {
                             top: { style: 'thin' },
                             left: { style: 'thin' },
                             bottom: { style: 'thin' },
                             right: { style: 'thin' }
                         };
-                        cell.font = { name: 'Arial', size: 10 };
-                        cell.alignment = cell.alignment || { horizontal: 'center', vertical: 'middle' };
+                        worksheet.getCell(currentRow, 9).font = { name: 'Arial', size: 10 };
+                        worksheet.getCell(currentRow, 9).alignment = { horizontal: 'center', vertical: 'middle' };
+                        
+                        nameCell.border = {
+                            top: { style: 'thin' },
+                            left: { style: 'thin' },
+                            bottom: { style: 'thin' },
+                            right: { style: 'thin' }
+                        };
+                        nameCell.font = { name: 'Arial', size: 10 };
+                        nameCell.alignment = { horizontal: 'center', vertical: 'middle' };
+                        
+                        // Set red fill if no employee
+                        if (!employeeName || employeeName.trim() === '') {
+                            console.log(`No employee for role ${roleName} at row ${currentRow}, col 10 - applying red fill`);
+                            nameCell.fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: 'FFFF0000' }
+                            };
+                        }
+                        
+                        worksheet.getCell(currentRow, 11).border = {
+                            top: { style: 'thin' },
+                            left: { style: 'thin' },
+                            bottom: { style: 'thin' },
+                            right: { style: 'thin' }
+                        };
+                        worksheet.getCell(currentRow, 11).font = { name: 'Arial', size: 10 };
+                        worksheet.getCell(currentRow, 11).alignment = { horizontal: 'center', vertical: 'middle' };
                     }
                 }
                 
@@ -744,7 +839,8 @@ router.get('/html/:scheduleId', requireAuth, async (req, res) => {
                         
                         const assignment = roleData.assignments[0];
                         const employeeName = getEmployeeName(assignment);
-                        html += `                    <td class="name-cell">${employeeName}</td>\n`;
+                        const redStyle = (!employeeName || employeeName.trim() === '') ? ' style="background-color: red !important;"' : '';
+                        html += `                    <td class="name-cell"${redStyle}>${employeeName}</td>\n`;
                         
                         // If this is a רגיל תקן role, it gets its own ambulance cell (always show, not merged)
                         if (isRegilTaken) {
@@ -783,7 +879,8 @@ router.get('/html/:scheduleId', requireAuth, async (req, res) => {
                         
                         const assignment = roleData.assignments[0];
                         const employeeName = getEmployeeName(assignment);
-                        html += `                    <td class="name-cell">${employeeName}</td>\n`;
+                        const redStyle = (!employeeName || employeeName.trim() === '') ? ' style="background-color: red !important;"' : '';
+                        html += `                    <td class="name-cell"${redStyle}>${employeeName}</td>\n`;
                         
                         if (isRegilTaken) {
                             const ambulanceNum = roleData.role.ambulance_number || '';
@@ -816,7 +913,8 @@ router.get('/html/:scheduleId', requireAuth, async (req, res) => {
                         
                         const assignment = roleData.assignments[0];
                         const employeeName = getEmployeeName(assignment);
-                        html += `                    <td class="name-cell">${employeeName}</td>\n`;
+                        const redStyle = (!employeeName || employeeName.trim() === '') ? ' style="background-color: red !important;"' : '';
+                        html += `                    <td class="name-cell"${redStyle}>${employeeName}</td>\n`;
                         
                         if (isRegilTaken) {
                             const ambulanceNum = roleData.role.ambulance_number || '';

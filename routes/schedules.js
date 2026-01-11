@@ -304,7 +304,27 @@ router.put('/:id', requireAuth, async (req, res) => {
  */
 router.delete('/:id', requireAuth, async (req, res) => {
     try {
+        // Get schedule info before deleting for logging
+        const scheduleResult = await select('schedules', { where: { id: req.params.id } });
+        let scheduleDate = '';
+        if (scheduleResult && scheduleResult.length > 0) {
+            scheduleDate = scheduleResult[0].schedule_date;
+        }
+        
         await deleteRow('schedules', req.params.id);
+        
+        // Log activity
+        await logActivity(
+            req.session.userId,
+            req.session.username,
+            'delete',
+            'schedule',
+            req.params.id,
+            `מחק סידור עבודה: ${scheduleDate}`,
+            { schedule_date: scheduleDate },
+            req.ip
+        );
+        
         res.json({ success: true, message: 'סידור עבודה נמחק בהצלחה' });
     } catch (error) {
         console.error('Error deleting schedule:', error);
@@ -348,6 +368,18 @@ router.post('/shifts/:shiftId/units', requireAuth, async (req, res) => {
             unit_order: unit_order || 0
         });
         
+        // Log activity
+        await logActivity(
+            req.session.userId,
+            req.session.username,
+            'create',
+            'unit',
+            newUnit[0].id,
+            `הוסיף תחנה: ${unit_name}`,
+            { unit_name, unit_type, shift_id: req.params.shiftId },
+            req.ip
+        );
+        
         res.json(newUnit[0]);
     } catch (error) {
         console.error('Error adding unit:', error);
@@ -367,6 +399,18 @@ router.post('/units/:unitId/roles', requireAuth, async (req, res) => {
             role_name,
             role_order: role_order || 0
         });
+        
+        // Log activity
+        await logActivity(
+            req.session.userId,
+            req.session.username,
+            'create',
+            'role',
+            newRole[0].id,
+            `הוסיף משימה: ${role_name}`,
+            { role_name, unit_id: req.params.unitId },
+            req.ip
+        );
         
         res.json(newRole[0]);
     } catch (error) {
@@ -396,6 +440,19 @@ router.post('/assignments', requireAuth, async (req, res) => {
             where: { role_id, schedule_id }
         });
         
+        // Get employee name for logging
+        let employeeName = manual_employee_name;
+        if (employee_id) {
+            const empResult = await select('employees', { where: { id: employee_id } });
+            if (empResult && empResult.length > 0) {
+                employeeName = `${empResult[0].first_name} ${empResult[0].last_name}`;
+            }
+        }
+        
+        // Get role info for logging
+        const roleResult = await select('roles', { where: { id: role_id } });
+        const roleName = roleResult && roleResult.length > 0 ? roleResult[0].role_name : 'Unknown';
+        
         if (existing && existing.length > 0) {
             // Update existing assignment
             const updateData = {
@@ -404,6 +461,19 @@ router.post('/assignments', requireAuth, async (req, res) => {
             };
             
             const updated = await update('assignments', existing[0].id, updateData);
+            
+            // Log activity
+            await logActivity(
+                req.session.userId,
+                req.session.username,
+                'update',
+                'assignment',
+                updated[0].id,
+                `עדכן שיבוץ: ${employeeName} לתפקיד ${roleName}`,
+                { role_id, schedule_id, employee_name: employeeName },
+                req.ip
+            );
+            
             return res.json(updated[0]);
         }
         
@@ -417,6 +487,19 @@ router.post('/assignments', requireAuth, async (req, res) => {
             };
             
             const newAssignment = await insert('assignments', assignmentData);
+            
+            // Log activity
+            await logActivity(
+                req.session.userId,
+                req.session.username,
+                'create',
+                'assignment',
+                newAssignment[0].id,
+                `שיבץ: ${employeeName} לתפקיד ${roleName}`,
+                { role_id, schedule_id, employee_name: employeeName },
+                req.ip
+            );
+            
             res.json(newAssignment[0]);
         } catch (insertError) {
             // If insert fails due to duplicate, try to update
@@ -449,7 +532,35 @@ router.post('/assignments', requireAuth, async (req, res) => {
  */
 router.delete('/assignments/:id', requireAuth, async (req, res) => {
     try {
+        // Get assignment info before deleting for logging
+        const assignmentResult = await select('assignments', { where: { id: req.params.id } });
+        let logDetails = '';
+        if (assignmentResult && assignmentResult.length > 0) {
+            const assignment = assignmentResult[0];
+            if (assignment.manual_employee_name) {
+                logDetails = assignment.manual_employee_name;
+            } else if (assignment.employee_id) {
+                const empResult = await select('employees', { where: { id: assignment.employee_id } });
+                if (empResult && empResult.length > 0) {
+                    logDetails = `${empResult[0].first_name} ${empResult[0].last_name}`;
+                }
+            }
+        }
+        
         await deleteRow('assignments', req.params.id);
+        
+        // Log activity
+        await logActivity(
+            req.session.userId,
+            req.session.username,
+            'delete',
+            'assignment',
+            req.params.id,
+            `הסיר שיבוץ: ${logDetails}`,
+            null,
+            req.ip
+        );
+        
         res.json({ success: true, message: 'שיבוץ הוסר בהצלחה' });
     } catch (error) {
         console.error('Error removing assignment:', error);
@@ -609,6 +720,18 @@ router.post('/:scheduleId/extra-missions', requireAuth, async (req, res) => {
             notes,
             display_order: 0
         });
+        
+        // Log activity
+        await logActivity(
+            req.session.userId,
+            req.session.username,
+            'create',
+            'extra_mission',
+            result[0].id,
+            `הוסיף משימה מחוץ למשמרת: ${location || vehicle || 'משימה חדשה'}`,
+            { hours, location, vehicle, driver_name, schedule_id: scheduleId },
+            req.ip
+        );
         
         res.json(result[0]);
     } catch (error) {
