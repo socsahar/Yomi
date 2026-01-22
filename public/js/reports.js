@@ -4,10 +4,11 @@ let currentStartDate = null;
 let currentEndDate = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Set default date range (last 30 days)
-    const endDate = new Date();
+    // Set default date range (last 30 days + next 60 days)
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - 30);
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() + 60);
     
     document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
     document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
@@ -26,9 +27,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     
     document.getElementById('resetBtn').addEventListener('click', async () => {
-        const endDate = new Date();
         const startDate = new Date();
         startDate.setDate(startDate.getDate() - 30);
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() + 60);
         
         document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
         document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
@@ -62,7 +64,6 @@ async function loadAllReports() {
         
         // Load tables
         displayTopEmployees(data.topEmployees);
-        displayStationStats(data.stationStats);
         displayShiftStats(data.shiftStats);
         displayScheduleStatus(data.recentSchedules);
         
@@ -179,7 +180,7 @@ function displayShiftStats(shifts) {
                 <tr>
                     <th>משמרת</th>
                     <th>מספר משמרות</th>
-                    <th>יחידות</th>
+                    <th>תחנות</th>
                     <th>תפקידים</th>
                 </tr>
             </thead>

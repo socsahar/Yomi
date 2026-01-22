@@ -76,9 +76,11 @@ CREATE TABLE IF NOT EXISTS assignments (
     id SERIAL PRIMARY KEY,
     role_id INTEGER REFERENCES roles(id) ON DELETE CASCADE,
     employee_id INTEGER REFERENCES employees(id) ON DELETE CASCADE,
+    manual_employee_name VARCHAR(255), -- Allow manual assignment of employees not in the employees list
     schedule_id INTEGER REFERENCES schedules(id) ON DELETE CASCADE,
     assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(role_id, schedule_id)
+    UNIQUE(role_id, schedule_id),
+    CHECK (employee_id IS NOT NULL OR manual_employee_name IS NOT NULL)
 );
 
 -- Extra ambulances (מעל התקן)

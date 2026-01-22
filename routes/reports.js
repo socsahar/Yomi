@@ -34,57 +34,45 @@ router.get('/statistics', requireAuth, async (req, res) => {
             params.push(endDate);
         }
         
-        // Summary statistics
-        const { data: summary } = await supabase.rpc('get_summary_stats', {
-            start_date: startDate || null,
-            end_date: endDate || null
-        }).single();
-        
-        // If RPC doesn't exist, fall back to manual queries
+        // Summary statistics - using manual queries
         let summaryData;
-        if (!summary) {
-            // Total schedules
-            const schedulesQuery = startDate || endDate
-                ? supabase.from('schedules')
-                    .select('id', { count: 'exact', head: true })
-                    .gte('schedule_date', startDate || '1900-01-01')
-                    .lte('schedule_date', endDate || '2100-12-31')
-                : supabase.from('schedules').select('id', { count: 'exact', head: true });
-            
-            const { count: totalSchedules } = await schedulesQuery;
-            
-            // Total assignments
-            const assignmentsQuery = startDate || endDate
-                ? supabase.from('assignments')
-                    .select('id, schedules!inner(schedule_date)', { count: 'exact', head: true })
-                    .gte('schedules.schedule_date', startDate || '1900-01-01')
-                    .lte('schedules.schedule_date', endDate || '2100-12-31')
-                : supabase.from('assignments').select('id', { count: 'exact', head: true });
-            
-            const { count: totalAssignments } = await assignmentsQuery;
-            
-            // Unique ambulances
-            const rolesQuery = startDate || endDate
-                ? supabase.from('roles')
-                    .select('ambulance_number, units!inner(shifts!inner(schedules!inner(schedule_date)))')
-                    .not('ambulance_number', 'is', null)
-                    .gte('units.shifts.schedules.schedule_date', startDate || '1900-01-01')
-                    .lte('units.shifts.schedules.schedule_date', endDate || '2100-12-31')
-                : supabase.from('roles')
-                    .select('ambulance_number')
-                    .not('ambulance_number', 'is', null);
-            
-            const { data: ambulances } = await rolesQuery;
-            const uniqueAmbulances = new Set(ambulances?.map(r => r.ambulance_number).filter(Boolean)).size;
-            
-            summaryData = {
-                totalSchedules: totalSchedules || 0,
-                totalAssignments: totalAssignments || 0,
-                uniqueAmbulances
-            };
-        } else {
-            summaryData = summary;
-        }
+        
+        // Total schedules
+        let schedulesQuery = supabase.from('schedules').select('id', { count: 'exact', head: true });
+        
+        if (startDate) schedulesQuery = schedulesQuery.gte('schedule_date', startDate);
+        if (endDate) schedulesQuery = schedulesQuery.lte('schedule_date', endDate);
+        
+        const { count: totalSchedules } = await schedulesQuery;
+        
+        // Total assignments - join with schedules to filter by date
+        let assignmentsQuery = supabase
+            .from('assignments')
+            .select('id, schedules!inner(schedule_date)', { count: 'exact', head: true });
+        
+        if (startDate) assignmentsQuery = assignmentsQuery.gte('schedules.schedule_date', startDate);
+        if (endDate) assignmentsQuery = assignmentsQuery.lte('schedules.schedule_date', endDate);
+        
+        const { count: totalAssignments } = await assignmentsQuery;
+        
+        // Unique ambulances - get all roles with ambulance numbers in date range
+        let ambulancesQuery = supabase
+            .from('roles')
+            .select('ambulance_number, units!inner(shifts!inner(schedules!inner(schedule_date)))')
+            .not('ambulance_number', 'is', null)
+            .neq('ambulance_number', '');
+        
+        if (startDate) ambulancesQuery = ambulancesQuery.gte('units.shifts.schedules.schedule_date', startDate);
+        if (endDate) ambulancesQuery = ambulancesQuery.lte('units.shifts.schedules.schedule_date', endDate);
+        
+        const { data: ambulances } = await ambulancesQuery;
+        const uniqueAmbulances = new Set(ambulances?.map(r => r.ambulance_number).filter(Boolean)).size;
+        
+        summaryData = {
+            totalSchedules: totalSchedules || 0,
+            totalAssignments: totalAssignments || 0,
+            uniqueAmbulances
+        };
         
         // Top employees by assignment count
         let topEmployeesQuery = supabase
@@ -92,6 +80,7 @@ router.get('/statistics', requireAuth, async (req, res) => {
             .select(`
                 employee_id,
                 manual_employee_name,
+                role_id,
                 employees(first_name, last_name),
                 schedules!inner(schedule_date)
             `);
@@ -120,13 +109,19 @@ router.get('/statistics', requireAuth, async (req, res) => {
                 employeeMap[employeeKey] = {
                     employee_name: employeeName,
                     assignment_count: 0,
-                    unique_roles: 0
+                    unique_roles: new Set()
                 };
             }
             employeeMap[employeeKey].assignment_count++;
+            employeeMap[employeeKey].unique_roles.add(assignment.role_id);
         });
         
         const topEmployees = Object.values(employeeMap)
+            .map(emp => ({
+                employee_name: emp.employee_name,
+                assignment_count: emp.assignment_count,
+                unique_roles: emp.unique_roles.size
+            }))
             .sort((a, b) => b.assignment_count - a.assignment_count)
             .slice(0, 10);
         
