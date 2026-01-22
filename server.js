@@ -11,6 +11,7 @@ const scheduleRoutes = require('./routes/schedules');
 const exportRoutes = require('./routes/export');
 const reportsRoutes = require('./routes/reports');
 const activityRoutes = require('./routes/activity');
+const userRoutes = require('./routes/users');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -56,6 +57,7 @@ app.use('/api/schedules', scheduleRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/reports', reportsRoutes);
 app.use('/api/activity', activityRoutes);
+app.use('/api/users', userRoutes);
 
 // Main page route (BEFORE static files)
 app.get('/', (req, res) => {
@@ -97,6 +99,10 @@ app.get('/reports', requireAuth, (req, res) => {
 
 app.get('/activity', requireAuth, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'activity.html'));
+});
+
+app.get('/users', requireAuth, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'users.html'));
 });
 
 // Error handling

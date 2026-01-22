@@ -1,6 +1,155 @@
 // Common utility functions and authentication checks
 
 /**
+ * Toast notification system
+ */
+let toastContainer = null;
+
+function createToastContainer() {
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.className = 'toast-container';
+        document.body.appendChild(toastContainer);
+    }
+    return toastContainer;
+}
+
+function showToast(message, type = 'info', duration = 3000) {
+    const container = createToastContainer();
+    
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    
+    const icon = document.createElement('span');
+    icon.className = 'toast-icon';
+    
+    switch(type) {
+        case 'success':
+            icon.textContent = '✓';
+            break;
+        case 'error':
+            icon.textContent = '✕';
+            break;
+        case 'warning':
+            icon.textContent = '⚠';
+            break;
+        case 'info':
+            icon.textContent = 'ℹ';
+            break;
+    }
+    
+    const messageEl = document.createElement('span');
+    messageEl.className = 'toast-message';
+    messageEl.textContent = message;
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'toast-close';
+    closeBtn.textContent = '×';
+    closeBtn.onclick = () => removeToast(toast);
+    
+    toast.appendChild(icon);
+    toast.appendChild(messageEl);
+    toast.appendChild(closeBtn);
+    
+    container.appendChild(toast);
+    
+    // Trigger animation
+    setTimeout(() => toast.classList.add('show'), 10);
+    
+    // Auto remove
+    if (duration > 0) {
+        setTimeout(() => removeToast(toast), duration);
+    }
+    
+    return toast;
+}
+
+function removeToast(toast) {
+    toast.classList.remove('show');
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.parentElement.removeChild(toast);
+        }
+    }, 300);
+}
+
+function showSuccess(message, duration = 3000) {
+    return showToast(message, 'success', duration);
+}
+
+function showError(message, duration = 4000) {
+    return showToast(message, 'error', duration);
+}
+
+function showWarning(message, duration = 3000) {
+    return showToast(message, 'warning', duration);
+}
+
+function showInfo(message, duration = 3000) {
+    return showToast(message, 'info', duration);
+}
+
+/**
+ * Custom confirm dialog
+ */
+function showConfirm(title, message, onConfirm, onCancel) {
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-overlay';
+    
+    const dialog = document.createElement('div');
+    dialog.className = 'confirm-dialog';
+    
+    const titleEl = document.createElement('div');
+    titleEl.className = 'confirm-title';
+    titleEl.textContent = title;
+    
+    const messageEl = document.createElement('div');
+    messageEl.className = 'confirm-message';
+    messageEl.textContent = message;
+    
+    const buttons = document.createElement('div');
+    buttons.className = 'confirm-buttons';
+    
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn btn-secondary';
+    cancelBtn.textContent = 'ביטול';
+    cancelBtn.onclick = () => {
+        document.body.removeChild(overlay);
+        if (onCancel) onCancel();
+    };
+    
+    const confirmBtn = document.createElement('button');
+    confirmBtn.className = 'btn btn-primary';
+    confirmBtn.textContent = 'אישור';
+    confirmBtn.onclick = () => {
+        document.body.removeChild(overlay);
+        if (onConfirm) onConfirm();
+    };
+    
+    buttons.appendChild(cancelBtn);
+    buttons.appendChild(confirmBtn);
+    
+    dialog.appendChild(titleEl);
+    dialog.appendChild(messageEl);
+    dialog.appendChild(buttons);
+    overlay.appendChild(dialog);
+    
+    document.body.appendChild(overlay);
+    
+    // Trigger animation
+    setTimeout(() => overlay.classList.add('show'), 10);
+    
+    // Close on overlay click
+    overlay.onclick = (e) => {
+        if (e.target === overlay) {
+            document.body.removeChild(overlay);
+            if (onCancel) onCancel();
+        }
+    };
+}
+
+/**
  * Check if user is authenticated
  */
 async function checkAuth() {
@@ -34,9 +183,9 @@ async function logout() {
 }
 
 /**
- * Show error message
+ * Show error message (legacy - for form fields)
  */
-function showError(elementId, message) {
+function showErrorField(elementId, message) {
     const element = document.getElementById(elementId);
     if (element) {
         element.textContent = message;
@@ -45,7 +194,7 @@ function showError(elementId, message) {
 }
 
 /**
- * Hide error message
+ * Hide error message (legacy - for form fields)
  */
 function hideError(elementId) {
     const element = document.getElementById(elementId);
@@ -131,9 +280,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            if (confirm('האם אתה בטוח שברצונך להתנתק?')) {
-                logout();
-            }
+            showConfirm(
+                'התנתקות',
+                'האם אתה בטוח שברצונך להתנתק?',
+                () => logout()
+            );
         });
     }
     

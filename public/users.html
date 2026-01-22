@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ניהול משתמשים - מערכת סידורי עבודה מד"א</title>
+    <link rel="icon" type="image/png" href="/logo.png">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .users-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .users-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .users-table {
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .users-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .users-table th {
+            background-color: #f8f9fa;
+            padding: 15px;
+            text-align: right;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .users-table td {
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .users-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 5px 15px;
+            font-size: 0.875rem;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        .btn-warning {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-temp {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .password-display {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            border: 2px solid #28a745;
+        }
+
+        .password-display .password-value {
+            font-family: monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #155724;
+            user-select: all;
+            word-break: break-all;
+        }
+
+        .password-display .copy-btn {
+            margin-top: 10px;
+        }
+
+        .warning-text {
+            color: #856404;
+            background-color: #fff3cd;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        .change-password-container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .change-password-container h2 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .change-password-container .alert {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 1px solid #ffeaa7;
+        }
+
+        @media (max-width: 768px) {
+            .users-table {
+                overflow-x: auto;
+            }
+
+            .user-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <button class="hamburger-menu" id="hamburgerBtn" aria-label="תפריט">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="nav-brand">
+                <h1>מערכת סידורי עבודה</h1>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="/dashboard" class="nav-link">ראשי</a></li>
+                <li><a href="/employees" class="nav-link">עובדים</a></li>
+                <li><a href="/schedule" class="nav-link">סידורי עבודה</a></li>
+                <li><a href="/reports" class="nav-link">דוחות</a></li>
+                <li><a href="/activity" class="nav-link">יומן פעילות</a></li>
+                <li><a href="/users" class="nav-link active">משתמשים</a></li>
+                <li><a href="#" id="logoutBtn" class="nav-link">התנתק</a></li>
+            </ul>
+            <div class="user-info">
+                <span id="username-display"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Users Management -->
+    <div class="users-container" id="usersManagement">
+        <div class="users-header">
+            <h2>ניהול משתמשים</h2>
+            <button class="btn btn-primary" id="createUserBtn">
+                ➕ יצירת משתמש חדש
+            </button>
+        </div>
+
+        <div class="users-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>שם משתמש</th>
+                        <th>תאריך יצירה</th>
+                        <th>פעילות אחרונה</th>
+                        <th>סטטוס</th>
+                        <th>פעולות</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <!-- Users will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Password Change Form (shown for first-time login) -->
+    <div class="users-container" id="changePasswordContainer" style="display: none;">
+        <div class="change-password-container">
+            <h2>שינוי סיסמה</h2>
+            <div class="alert">
+                <strong>שים לב:</strong> זוהי הכניסה הראשונה שלך למערכת או שהסיסמה שלך אופסה. עליך לשנות את הסיסמה לפני שתוכל להמשיך.
+            </div>
+            <form id="changePasswordForm">
+                <div class="form-group">
+                    <label for="current-password">סיסמה נוכחית</label>
+                    <input type="password" id="current-password" name="currentPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-password">סיסמה חדשה</label>
+                    <input type="password" id="new-password" name="newPassword" required minlength="6">
+                    <small>לפחות 6 תווים</small>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">אימות סיסמה חדשה</label>
+                    <input type="password" id="confirm-password" name="confirmPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">שנה סיסמה</button>
+                <div id="change-password-error" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create User Modal -->
+    <div class="modal" id="createUserModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>יצירת משתמש חדש</h3>
+            </div>
+            <div class="modal-body">
+                <form id="createUserForm">
+                    <div class="form-group">
+                        <label for="new-username">שם משתמש</label>
+                        <input type="text" id="new-username" name="username" required minlength="3">
+                        <small>לפחות 3 תווים</small>
+                    </div>
+                    <div id="create-user-error" class="error-message"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelCreateBtn">ביטול</button>
+                <button class="btn btn-primary" id="submitCreateBtn">צור משתמש</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Display Modal -->
+    <div class="modal" id="passwordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>משתמש נוצר בהצלחה</h3>
+            </div>
+            <div class="modal-body">
+                <p>סיסמה זמנית למשתמש <strong id="created-username"></strong>:</p>
+                <div class="password-display">
+                    <div class="password-value" id="temp-password"></div>
+                    <button class="btn btn-primary btn-small copy-btn" id="copyPasswordBtn">📋 העתק סיסמה</button>
+                </div>
+                <div class="warning-text">
+                    <strong>חשוב:</strong> העבר סיסמה זו למשתמש החדש. הוא יצטרך לשנות אותה בכניסה הראשונה.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="closePasswordModalBtn">סגור</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>אישור מחיקה</h3>
+            </div>
+            <div class="modal-body">
+                <p>האם אתה בטוח שברצונך למחוק את המשתמש <strong id="delete-username"></strong>?</p>
+                <div class="warning-text">
+                    פעולה זו אינה ניתנת לביטול.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelDeleteBtn">ביטול</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">מחק</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div class="modal" id="resetPasswordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>איפוס סיסמה</h3>
+            </div>
+            <div class="modal-body">
+                <p>סיסמה חדשה למשתמש <strong id="reset-username"></strong>:</p>
+                <div class="password-display">
+                    <div class="password-value" id="reset-password"></div>
+                    <button class="btn btn-primary btn-small copy-btn" id="copyResetPasswordBtn">📋 העתק סיסמה</button>
+                </div>
+                <div class="warning-text">
+                    <strong>חשוב:</strong> העבר סיסמה זו למשתמש. הוא יצטרך לשנות אותה בכניסה הבאה.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="closeResetModalBtn">סגור</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/common.js"></script>
+    <script src="/js/users.js"></script>
+</body>
+</html>

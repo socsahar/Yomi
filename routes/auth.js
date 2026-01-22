@@ -7,9 +7,12 @@ const router = express.Router();
 const SALT_ROUNDS = 10;
 
 /**
- * Register new user
+ * Register new user (DISABLED - users can only be created by admins through /api/users)
  */
 router.post('/register', async (req, res) => {
+    return res.status(403).json({ error: 'הרשמה עצמית אינה זמינה. נא ליצור קשר עם מנהל המערכת' });
+    
+    /* Original registration code disabled
     try {
         const { username, password } = req.body;
         
@@ -61,6 +64,7 @@ router.post('/register', async (req, res) => {
         console.error('Registration error:', error);
         res.status(500).json({ error: 'שגיאה ביצירת משתמש' });
     }
+    */
 });
 
 /**
@@ -113,6 +117,19 @@ router.post('/login', async (req, res) => {
             null,
             req.ip
         );
+        
+        // Check if user must change password
+        if (user.must_change_password || user.is_temp_password) {
+            return res.json({
+                success: true,
+                mustChangePassword: true,
+                message: 'נדרש לשנות סיסמה',
+                user: {
+                    id: user.id,
+                    username: user.username
+                }
+            });
+        }
         
         res.json({
             success: true,
@@ -229,6 +246,77 @@ router.get('/supabase-config', (req, res) => {
         // Use service_role key for realtime (full permissions)
         anonKey: process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY
     });
+});
+
+/**
+ * Change password (for first-time login or user-initiated change)
+ */
+router.post('/change-password', async (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ error: 'נדרשת הזדהות' });
+    }
+    
+    try {
+        const { currentPassword, newPassword } = req.body;
+        
+        // Validation
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ error: 'סיסמה נוכחית וסיסמה חדשה נדרשות' });
+        }
+        
+        if (newPassword.length < 6) {
+            return res.status(400).json({ error: 'סיסמה חדשה חייבת להכיל לפחות 6 תווים' });
+        }
+        
+        // Get user
+        const users = await select('users', {
+            where: { id: req.session.userId }
+        });
+        
+        if (!users || users.length === 0) {
+            return res.status(404).json({ error: 'משתמש לא נמצא' });
+        }
+        
+        const user = users[0];
+        
+        // Verify current password
+        const isValid = await bcrypt.compare(currentPassword, user.password_hash);
+        
+        if (!isValid) {
+            return res.status(401).json({ error: 'סיסמה נוכחית שגויה' });
+        }
+        
+        // Hash new password
+        const password_hash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+        
+        // Update password and clear temporary flags
+        await update('users', req.session.userId, {
+            password_hash,
+            is_temp_password: false,
+            must_change_password: false
+        });
+        
+        // Log activity
+        await logActivity(
+            req.session.userId,
+            req.session.username,
+            'update',
+            'user',
+            req.session.userId,
+            'שינה סיסמה',
+            null,
+            req.ip
+        );
+        
+        res.json({
+            success: true,
+            message: 'הסיסמה שונתה בהצלחה'
+        });
+        
+    } catch (error) {
+        console.error('Error changing password:', error);
+        res.status(500).json({ error: 'שגיאה בשינוי סיסמה' });
+    }
 });
 
 module.exports = router;

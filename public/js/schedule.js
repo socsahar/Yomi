@@ -119,28 +119,23 @@ function customSelect(message, options, title = 'בחר אפשרות') {
 }
 
 /**
- * Custom alert function
+ * Custom alert function (replaced with toast notifications)
  */
 function customAlert(message, title = 'הודעה') {
-    return new Promise((resolve) => {
-        const modal = document.getElementById('customAlertModal');
-        const titleEl = document.getElementById('alertTitle');
-        const messageEl = document.getElementById('alertMessage');
-        const okBtn = document.getElementById('alertOk');
-        
-        titleEl.textContent = title;
-        messageEl.textContent = message;
-        modal.style.display = 'block';
-        
-        const handleOk = () => {
-            modal.style.display = 'none';
-            okBtn.removeEventListener('click', handleOk);
-            resolve();
-        };
-        
-        okBtn.addEventListener('click', handleOk);
-    });
+    // Determine type based on title
+    let type = 'info';
+    if (title === 'שגיאה' || title.includes('שגיאה')) {
+        type = 'error';
+    } else if (title === 'הצלחה' || title.includes('הצלחה')) {
+        type = 'success';
+    } else if (title === 'שמירה' || title.includes('שמירה')) {
+        type = 'success';
+    }
+    
+    showToast(message, type);
+    return Promise.resolve();
 }
+
 
 /**
  * Custom confirm function

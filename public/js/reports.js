@@ -278,9 +278,3 @@ function viewSchedule(scheduleId) {
     window.location.href = `/schedule?id=${scheduleId}`;
 }
 
-/**
- * Show error message
- */
-function showError(message) {
-    alert(message);
-}

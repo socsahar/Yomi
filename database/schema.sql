@@ -6,6 +6,10 @@ CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
+    is_temp_password BOOLEAN DEFAULT false,
+    must_change_password BOOLEAN DEFAULT false,
+    created_by INTEGER REFERENCES users(id),
+    last_activity TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

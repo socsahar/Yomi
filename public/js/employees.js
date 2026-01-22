@@ -132,17 +132,20 @@ function editEmployee(id) {
  * Delete employee
  */
 async function deleteEmployee(id) {
-    if (!confirm('האם אתה בטוח שברצונך למחוק עובד זה?')) {
-        return;
-    }
-    
-    try {
-        await apiRequest(`/api/employees/${id}`, { method: 'DELETE' });
-        await loadEmployees();
-    } catch (error) {
-        console.error('Error deleting employee:', error);
-        alert('שגיאה במחיקת עובד');
-    }
+    showConfirm(
+        'מחיקת עובד',
+        'האם אתה בטוח שברצונך למחוק עובד זה?',
+        async () => {
+            try {
+                await apiRequest(`/api/employees/${id}`, { method: 'DELETE' });
+                await loadEmployees();
+                showSuccess('עובד נמחק בהצלחה');
+            } catch (error) {
+                console.error('Error deleting employee:', error);
+                showError('שגיאה במחיקת עובד');
+            }
+        }
+    );
 }
 
 /**
@@ -196,10 +199,13 @@ async function handleEmployeeFormSubmit(e) {
         
         hideModal('employeeModal');
         await loadEmployees();
+        showSuccess('העובד נשמר בהצלחה');
         
     } catch (error) {
         console.error('Error saving employee:', error);
-        showError('formError', error.message || 'שגיאה בשמירת עובד');
+        const errorMsg = error.message || 'שגיאה בשמירת עובד';
+        showError(errorMsg);
+        showErrorField('formError', errorMsg);
     }
 }
 

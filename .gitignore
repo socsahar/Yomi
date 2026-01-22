@@ -48,6 +48,14 @@ build/
 *.sqlite3
 *.db
 
+# SQL migration and setup files (may contain sensitive data or database structure)
+*.sql
+
+# Backup files
+*.dump
+*.backup.sql
+*.bak
+
 # Temporary files
 tmp/
 temp/
@@ -58,9 +66,15 @@ temp/
 # Excel and CSV files with sensitive data
 employee*.xlsx
 employee*.csv
+*.csv
+*.xlsx
+!template*.csv
+!template*.xlsx
+# Allow template files but exclude all data files
 
-# Documentation files (optional, keep if you want to track them)
-MANUAL_ASSIGNMENT_FEATURE.md
+# Documentation files (keep in repo for reference)
+# Commenting out to keep documentation tracked
+# MANUAL_ASSIGNMENT_FEATURE.md
 
 # Backup and old files
 *.backup
@@ -83,3 +97,21 @@ sessions/
 # Configuration files that might contain secrets
 config.local.js
 config.production.js
+
+# Database connection strings and credentials
+database.config.js
+db.config.js
+
+# Sensitive test data
+seed*.sql
+test-data.sql
+dummy-data.sql
+
+# Upload directories (may contain user-uploaded files)
+uploads/
+public/uploads/
+
+# Private documentation or notes
+PRIVATE*.md
+private-notes.md
+TODO_PRIVATE.md
