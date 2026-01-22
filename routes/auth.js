@@ -120,6 +120,7 @@ router.post('/login', async (req, res) => {
         
         // Check if user must change password
         if (user.must_change_password || user.is_temp_password) {
+            req.session.mustChangePassword = true;
             return res.json({
                 success: true,
                 mustChangePassword: true,
@@ -130,6 +131,9 @@ router.post('/login', async (req, res) => {
                 }
             });
         }
+        
+        // Clear the flag if it was previously set
+        req.session.mustChangePassword = false;
         
         res.json({
             success: true,
@@ -174,6 +178,7 @@ router.get('/status', async (req, res) => {
         
         res.json({
             authenticated: true,
+            mustChangePassword: req.session.mustChangePassword || false,
             user: {
                 id: req.session.userId,
                 username: req.session.username
@@ -295,6 +300,9 @@ router.post('/change-password', async (req, res) => {
             is_temp_password: false,
             must_change_password: false
         });
+        
+        // Clear session flag
+        req.session.mustChangePassword = false;
         
         // Log activity
         await logActivity(

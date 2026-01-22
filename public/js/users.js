@@ -36,6 +36,11 @@ async function init() {
 function showPasswordChange() {
     document.getElementById('usersManagement').style.display = 'none';
     document.getElementById('changePasswordContainer').style.display = 'block';
+    // Hide navigation bar when user must change password
+    const navbar = document.querySelector('.navbar');
+    if (navbar) {
+        navbar.style.display = 'none';
+    }
 }
 
 // Load all users
@@ -316,8 +321,11 @@ async function changePassword(event) {
         const data = await response.json();
         
         if (response.ok) {
-            showSuccess('הסיסמה שונתה בהצלחה');
-            setTimeout(() => {
+            showSuccess('הסיסמה שונתה בהצלחה');            // Show navbar again
+            const navbar = document.querySelector('.navbar');
+            if (navbar) {
+                navbar.style.display = '';
+            }            setTimeout(() => {
                 window.location.href = '/dashboard';
             }, 1500);
         } else {

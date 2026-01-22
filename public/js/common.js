@@ -162,6 +162,15 @@ async function checkAuth() {
             return null;
         }
         
+        // Check if user must change password and redirect if not on users page
+        if (data.mustChangePassword) {
+            const currentPath = window.location.pathname;
+            if (currentPath !== '/users' && currentPath !== '/users.html') {
+                window.location.href = '/users?mustChangePassword=true';
+                return null;
+            }
+        }
+        
         return data.user;
     } catch (error) {
         console.error('Auth check error:', error);

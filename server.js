@@ -80,24 +80,37 @@ function requireAuth(req, res, next) {
     }
 }
 
+// Middleware to check if password change is required
+function requirePasswordChanged(req, res, next) {
+    if (req.session.userId) {
+        if (req.session.mustChangePassword) {
+            // Redirect to users page for password change
+            return res.redirect('/users?mustChangePassword=true');
+        }
+        next();
+    } else {
+        res.status(401).json({ error: 'נדרשת הזדהות' });
+    }
+}
+
 // Protected pages
-app.get('/dashboard', requireAuth, (req, res) => {
+app.get('/dashboard', requireAuth, requirePasswordChanged, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get('/employees', requireAuth, (req, res) => {
+app.get('/employees', requireAuth, requirePasswordChanged, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'employees.html'));
 });
 
-app.get('/schedule', requireAuth, (req, res) => {
+app.get('/schedule', requireAuth, requirePasswordChanged, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'schedule.html'));
 });
 
-app.get('/reports', requireAuth, (req, res) => {
+app.get('/reports', requireAuth, requirePasswordChanged, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'reports.html'));
 });
 
-app.get('/activity', requireAuth, (req, res) => {
+app.get('/activity', requireAuth, requirePasswordChanged, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'activity.html'));
 });
 

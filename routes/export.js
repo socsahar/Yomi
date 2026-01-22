@@ -237,14 +237,16 @@ router.get('/excel/:scheduleId', requireAuth, async (req, res) => {
                     const roleData = lailaRoles[roleIdx];
                     const roleName = roleData.role.role_name;
                     
-                    // Check if this is a special merged row
-                    const isSpecial = roleName === 'טיוטר' || roleName.includes(':');
+                    // Check if this is a special merged row (only time rows)
+                    const isTimeRow = roleName.includes(':');
+                    const isTutor = roleName === 'טיוטר';
                     
-                    if (isSpecial) {
-                        // Merge cells for טיוטר or time rows
+                    if (isTimeRow) {
+                        // Merge cells for time rows
                         worksheet.mergeCells(currentRow, 3, currentRow, 5);
-                        worksheet.getCell(currentRow, 3).value = roleName;
-                        worksheet.getCell(currentRow, 3).alignment = { horizontal: 'center', vertical: 'middle' };
+                        const mergedCell = worksheet.getCell(currentRow, 3);
+                        mergedCell.value = roleName;
+                        mergedCell.alignment = { horizontal: 'center', vertical: 'middle' };
                     } else {
                         // Regular role - 3 columns: משימה | שם | מספר
                         worksheet.getCell(currentRow, 3).value = roleName;
@@ -285,8 +287,17 @@ router.get('/excel/:scheduleId', requireAuth, async (req, res) => {
                         nameCell.font = { name: 'Arial', size: 10 };
                         nameCell.alignment = { horizontal: 'center', vertical: 'middle' };
                         
-                        // Set red fill if no employee
-                        if (!employeeName || employeeName.trim() === '') {
+                        // Set fill based on role type and employee presence
+                        if (isTutor) {
+                            // טיוטר: dark gray if no employee, light gray if employee assigned
+                            const fillColor = employeeName ? 'FFE8E8E8' : 'FF808080';
+                            nameCell.fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: fillColor }
+                            };
+                        } else if (!employeeName || employeeName.trim() === '') {
+                            // Regular roles: red if no employee
                             console.log(`No employee for role ${roleName} at row ${currentRow}, col 4 - applying red fill`);
                             nameCell.fill = {
                                 type: 'pattern',
@@ -312,12 +323,14 @@ router.get('/excel/:scheduleId', requireAuth, async (req, res) => {
                     const roleData = bokerRoles[roleIdx];
                     const roleName = roleData.role.role_name;
                     
-                    const isSpecial = roleName === 'טיוטר' || roleName.includes(':');
+                    const isTimeRow = roleName.includes(':');
+                    const isTutor = roleName === 'טיוטר';
                     
-                    if (isSpecial) {
+                    if (isTimeRow) {
                         worksheet.mergeCells(currentRow, 6, currentRow, 8);
-                        worksheet.getCell(currentRow, 6).value = roleName;
-                        worksheet.getCell(currentRow, 6).alignment = { horizontal: 'center', vertical: 'middle' };
+                        const mergedCell = worksheet.getCell(currentRow, 6);
+                        mergedCell.value = roleName;
+                        mergedCell.alignment = { horizontal: 'center', vertical: 'middle' };
                     } else {
                         worksheet.getCell(currentRow, 6).value = roleName;
                         
@@ -354,8 +367,17 @@ router.get('/excel/:scheduleId', requireAuth, async (req, res) => {
                         nameCell.font = { name: 'Arial', size: 10 };
                         nameCell.alignment = { horizontal: 'center', vertical: 'middle' };
                         
-                        // Set red fill if no employee
-                        if (!employeeName || employeeName.trim() === '') {
+                        // Set fill based on role type and employee presence
+                        if (isTutor) {
+                            // טיוטר: dark gray if no employee, light gray if employee assigned
+                            const fillColor = employeeName ? 'FFE8E8E8' : 'FF808080';
+                            nameCell.fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: fillColor }
+                            };
+                        } else if (!employeeName || employeeName.trim() === '') {
+                            // Regular roles: red if no employee
                             console.log(`No employee for role ${roleName} at row ${currentRow}, col 7 - applying red fill`);
                             nameCell.fill = {
                                 type: 'pattern',
@@ -381,12 +403,14 @@ router.get('/excel/:scheduleId', requireAuth, async (req, res) => {
                     const roleData = erevRoles[roleIdx];
                     const roleName = roleData.role.role_name;
                     
-                    const isSpecial = roleName === 'טיוטר' || roleName.includes(':');
+                    const isTimeRow = roleName.includes(':');
+                    const isTutor = roleName === 'טיוטר';
                     
-                    if (isSpecial) {
+                    if (isTimeRow) {
                         worksheet.mergeCells(currentRow, 9, currentRow, 11);
-                        worksheet.getCell(currentRow, 9).value = roleName;
-                        worksheet.getCell(currentRow, 9).alignment = { horizontal: 'center', vertical: 'middle' };
+                        const mergedCell = worksheet.getCell(currentRow, 9);
+                        mergedCell.value = roleName;
+                        mergedCell.alignment = { horizontal: 'center', vertical: 'middle' };
                     } else {
                         worksheet.getCell(currentRow, 9).value = roleName;
                         
@@ -423,8 +447,17 @@ router.get('/excel/:scheduleId', requireAuth, async (req, res) => {
                         nameCell.font = { name: 'Arial', size: 10 };
                         nameCell.alignment = { horizontal: 'center', vertical: 'middle' };
                         
-                        // Set red fill if no employee
-                        if (!employeeName || employeeName.trim() === '') {
+                        // Set fill based on role type and employee presence
+                        if (isTutor) {
+                            // טיוטר: dark gray if no employee, light gray if employee assigned
+                            const fillColor = employeeName ? 'FFE8E8E8' : 'FF808080';
+                            nameCell.fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: fillColor }
+                            };
+                        } else if (!employeeName || employeeName.trim() === '') {
+                            // Regular roles: red if no employee
                             console.log(`No employee for role ${roleName} at row ${currentRow}, col 10 - applying red fill`);
                             nameCell.fill = {
                                 type: 'pattern',
@@ -683,7 +716,7 @@ router.get('/html/:scheduleId', requireAuth, async (req, res) => {
         }
         
         .empty-cell {
-            background: #000 !important;
+            background: #808080 !important;
             border: 1px solid #000 !important;
         }
         
@@ -785,7 +818,7 @@ router.get('/html/:scheduleId', requireAuth, async (req, res) => {
             let ambulanceAdded = { 'לילה': false, 'בוקר': false, 'ערב': false };
             let ambulanceRowspan = { 'לילה': { start: -1, end: -1 }, 'בוקר': { start: -1, end: -1 }, 'ערב': { start: -1, end: -1 } };
             
-            // Count consecutive crew roles from first crew role (excluding time rows and רגיל תקן)
+            // Count consecutive crew roles from first crew role (excluding time rows, רגיל תקן, and טיוטר)
             const crewRoleCount = { 'לילה': 0, 'בוקר': 0, 'ערב': 0 };
             ['לילה', 'בוקר', 'ערב'].forEach(shiftName => {
                 const roles = stationData.shifts[shiftName] || [];
@@ -795,7 +828,8 @@ router.get('/html/:scheduleId', requireAuth, async (req, res) => {
                     const r = roles[i];
                     const isTimeRow = r.role.role_name.includes(':') && r.role.role_name.includes('-');
                     const isRegilTaken = r.role.role_name.includes('רגיל תקן');
-                    const isCrewRole = !isTimeRow && !isRegilTaken;
+                    const isTutor = r.role.role_name === 'טיוטר';
+                    const isCrewRole = !isTimeRow && !isRegilTaken && !isTutor;
                     
                     if (isCrewRole) {
                         if (!counting) {
@@ -831,6 +865,7 @@ router.get('/html/:scheduleId', requireAuth, async (req, res) => {
                     
                     const isTimeRow = roleName.includes(':') && roleName.includes('-');
                     const isRegilTaken = roleName.includes('רגיל תקן');
+                    const isTutor = roleName === 'טיוטר';
                     
                     if (isTimeRow) {
                         html += `                    <td colspan="3" class="special-row">${roleName}</td>\n`;
@@ -839,8 +874,17 @@ router.get('/html/:scheduleId', requireAuth, async (req, res) => {
                         
                         const assignment = roleData.assignments[0];
                         const employeeName = getEmployeeName(assignment);
-                        const redStyle = (!employeeName || employeeName.trim() === '') ? ' style="background-color: red !important;"' : '';
-                        html += `                    <td class="name-cell"${redStyle}>${employeeName}</td>\n`;
+                        
+                        // Special styling for טיוטר name cell
+                        let nameStyle = '';
+                        if (isTutor) {
+                            const bgColor = employeeName ? '#E8E8E8' : '#808080'; // light gray if assigned, dark gray if not
+                            nameStyle = ` style="background-color: ${bgColor} !important;"`;
+                        } else if (!employeeName || employeeName.trim() === '') {
+                            nameStyle = ' style="background-color: red !important;"';
+                        }
+                        
+                        html += `                    <td class="name-cell"${nameStyle}>${employeeName}</td>\n`;
                         
                         // If this is a רגיל תקן role, it gets its own ambulance cell (always show, not merged)
                         if (isRegilTaken) {
@@ -871,6 +915,7 @@ router.get('/html/:scheduleId', requireAuth, async (req, res) => {
                     
                     const isTimeRow = roleName.includes(':') && roleName.includes('-');
                     const isRegilTaken = roleName.includes('רגיל תקן');
+                    const isTutor = roleName === 'טיוטר';
                     
                     if (isTimeRow) {
                         html += `                    <td colspan="3" class="special-row">${roleName}</td>\n`;
@@ -879,8 +924,17 @@ router.get('/html/:scheduleId', requireAuth, async (req, res) => {
                         
                         const assignment = roleData.assignments[0];
                         const employeeName = getEmployeeName(assignment);
-                        const redStyle = (!employeeName || employeeName.trim() === '') ? ' style="background-color: red !important;"' : '';
-                        html += `                    <td class="name-cell"${redStyle}>${employeeName}</td>\n`;
+                        
+                        // Special styling for טיוטר name cell
+                        let nameStyle = '';
+                        if (isTutor) {
+                            const bgColor = employeeName ? '#E8E8E8' : '#808080'; // light gray if assigned, dark gray if not
+                            nameStyle = ` style="background-color: ${bgColor} !important;"`;
+                        } else if (!employeeName || employeeName.trim() === '') {
+                            nameStyle = ' style="background-color: red !important;"';
+                        }
+                        
+                        html += `                    <td class="name-cell"${nameStyle}>${employeeName}</td>\n`;
                         
                         if (isRegilTaken) {
                             const ambulanceNum = roleData.role.ambulance_number || '';
@@ -905,6 +959,7 @@ router.get('/html/:scheduleId', requireAuth, async (req, res) => {
                     
                     const isTimeRow = roleName.includes(':') && roleName.includes('-');
                     const isRegilTaken = roleName.includes('רגיל תקן');
+                    const isTutor = roleName === 'טיוטר';
                     
                     if (isTimeRow) {
                         html += `                    <td colspan="3" class="special-row">${roleName}</td>\n`;
@@ -913,8 +968,17 @@ router.get('/html/:scheduleId', requireAuth, async (req, res) => {
                         
                         const assignment = roleData.assignments[0];
                         const employeeName = getEmployeeName(assignment);
-                        const redStyle = (!employeeName || employeeName.trim() === '') ? ' style="background-color: red !important;"' : '';
-                        html += `                    <td class="name-cell"${redStyle}>${employeeName}</td>\n`;
+                        
+                        // Special styling for טיוטר name cell
+                        let nameStyle = '';
+                        if (isTutor) {
+                            const bgColor = employeeName ? '#E8E8E8' : '#808080'; // light gray if assigned, dark gray if not
+                            nameStyle = ` style="background-color: ${bgColor} !important;"`;
+                        } else if (!employeeName || employeeName.trim() === '') {
+                            nameStyle = ' style="background-color: red !important;"';
+                        }
+                        
+                        html += `                    <td class="name-cell"${nameStyle}>${employeeName}</td>\n`;
                         
                         if (isRegilTaken) {
                             const ambulanceNum = roleData.role.ambulance_number || '';
