@@ -361,10 +361,14 @@ async function loadSchedules() {
             return;
         }
         
-        listContainer.innerHTML = schedulesList.map(schedule => `
+        listContainer.innerHTML = schedulesList.map(schedule => {
+            const date = new Date(schedule.schedule_date);
+            const dayOfWeek = date.toLocaleDateString('he-IL', { weekday: 'long' });
+            
+            return `
             <div class="schedule-item">
                 <div class="schedule-item-info" onclick="loadScheduleEditor(${schedule.id})" style="cursor: pointer;">
-                    <h4>סידור עבודה</h4>
+                    <h4>${dayOfWeek}</h4>
                     <p>${formatDate(schedule.schedule_date)}</p>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -373,7 +377,8 @@ async function loadSchedules() {
                             title="מחק סידור">מחק</button>
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
         
     } catch (error) {
         console.error('Error loading schedules:', error);

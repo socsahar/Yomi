@@ -21,15 +21,20 @@ async function loadRecentSchedules() {
         // Show only last 5 schedules
         const recentSchedules = schedules.slice(0, 5);
         
-        listContainer.innerHTML = recentSchedules.map(schedule => `
+        listContainer.innerHTML = recentSchedules.map(schedule => {
+            const date = new Date(schedule.schedule_date);
+            const dayOfWeek = date.toLocaleDateString('he-IL', { weekday: 'long' });
+            
+            return `
             <div class="schedule-item" onclick="openSchedule(${schedule.id})">
                 <div class="schedule-item-info">
-                    <h4>${schedule.station}</h4>
+                    <h4>${dayOfWeek}</h4>
                     <p>${formatDate(schedule.schedule_date)}</p>
                 </div>
                 <span class="status-badge ${schedule.status}">${getStatusText(schedule.status)}</span>
             </div>
-        `).join('');
+        `;
+        }).join('');
         
     } catch (error) {
         console.error('Error loading schedules:', error);
